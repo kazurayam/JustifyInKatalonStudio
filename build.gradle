@@ -1,0 +1,18 @@
+plugins {
+    id 'groovy'
+    id 'com.katalon.gradle-plugin' version '0.0.7'
+}
+
+repositories {
+        mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.leadpony.justify/justify
+    compile group: 'org.leadpony.justify', name: 'justify', version: '0.16.0'
+
+    // https://mvnrepository.com/artifact/org.glassfish/javax.json
+    compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
+}
+
+// type "$ ./gradlew katalonCopyDependendies" will insert jar files into the Drivers directory
