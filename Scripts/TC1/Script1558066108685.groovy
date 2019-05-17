@@ -13,10 +13,14 @@ import javax.json.JsonValue
 import javax.json.JsonWriter
 import javax.json.JsonWriterFactory
 import javax.json.stream.JsonGenerator
+import javax.json.stream.JsonLocation
+import java.util.function.Consumer
 
 import org.leadpony.justify.api.JsonSchema
 import org.leadpony.justify.api.JsonValidationService
+import org.leadpony.justify.api.Problem
 import org.leadpony.justify.api.ProblemHandler
+
 import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
 import com.kms.katalon.core.configuration.RunConfiguration
 
@@ -101,7 +105,73 @@ class MyJsonPrinter {
 	}
 }
 
+/**
+ * A custom problem handler which will format the found problems in a HTML table.
+ *
+ * For the sake of simplicity, this handler ignores the branches of the problem
+ * even if there were multiple solutions for the problem.
+ *
+ * @see ProblemHandler
+ */
+public class MyProblemHandler implements ProblemHandler {
 
+	private final StringBuilder sb
+	private final PrintStream out
+
+	public MyProblemHandler() {
+		this.sb = new StringBuilder()
+		this.out = System.out
+		// Outputs opening elements.
+		sb.append("<table>\n")
+		sb.append("<thead>\n")
+		sb.append("<tr>")
+		sb.append("<th>Line No.</th>")
+		sb.append("<th>Column No.</th>")
+		sb.append("<th>Message</th>")
+		sb.append("<th>Assertion Keyword</th>")
+		sb.append("</tr>\n")
+		sb.append("</thead>\n");
+		sb.append("<tbody>\n");
+	}
+
+	public void flush() {
+		// Outputs closing elements.
+		sb.append("</tbody>\n")
+		sb.append("</table>\n")
+	}
+
+	public String getOutput() {
+		return sb.toString()
+	}
+	
+	/**
+	 * Handles the found problems.
+	 * We will output a row of the table for each problem.
+	 *
+	 * @param problems the found problems.
+	 */
+	@Override
+	public void handleProblems(List<Problem> problems) {
+		for (Problem problem : problems) {
+			JsonLocation loc = problem.getLocation()
+			sb.append("<tr>")
+			sb.append("<td>")
+			sb.append(loc.getLineNumber())
+			sb.append("</td>")
+			sb.append("<td>")
+			sb.append(loc.getColumnNumber())
+			sb.append("</td>")
+			sb.append("<td>")
+			sb.append(problem.getMessage())
+			sb.append("</td>")
+			sb.append("<td>")
+			sb.append(problem.getKeyword())
+			sb.append("</td>")
+			sb.append("</tr>")
+			sb.append("\n")
+		}
+	}
+}
 
 Path projectDir = Paths.get(RunConfiguration.getProjectDir())
 Path credSchemaPath = projectDir.resolve('Include').resolve('resources').resolve('credential-schema.json')
@@ -113,13 +183,19 @@ JsonValidationService service = JsonValidationService.newInstance()
 // Reads the JSON schema
 JsonSchema schema = service.readSchema(credSchemaPath);
 
-// Problem handler which will print problems found.
-ProblemHandler handler = service.createProblemPrinter({ s ->
-	println "*** ${s}"
+// Problem handler which will just print messages to stdout.
+/*
+ProblemHandler handler = service.createProblemPrinter(new Consumer<String>() {
+	@Override
+	public void accept (String s) {
+		System.err.println("*** " + s)
+	}
 })
+ */
+MyProblemHandler handler1 = new MyProblemHandler()
 
 WebUI.comment("Reads the credentail.json file, validate it to be VALID, print the contents")
-service.createReader(credDataPath, schema, handler). with { reader ->
+service.createReader(credDataPath, schema, handler1).with { reader ->
 	try {
 		JsonValue value = reader.readValue()
 		println MyJsonNavigator.navigate(value)
@@ -128,9 +204,15 @@ service.createReader(credDataPath, schema, handler). with { reader ->
 	    reader.close()
 	}
 }
+handler1.flush()
+println handler1.getOutput()
 
-WebUI.comment("Reads the geographical-coordiation.json file validate it against credential-schema.json, print the error messages")
-service.createReader(coordDataPath, schema, handler). with { reader ->
+
+
+
+WebUI.comment("Reads the geographical-coordiation.json file validate it against credential-schema.json; this will fail")
+MyProblemHandler handler2 = new MyProblemHandler()
+service.createReader(coordDataPath, schema, handler2).with { reader ->
 	try {
 		JsonValue value = reader.readValue()
 		println MyJsonNavigator.navigate(value)
@@ -139,4 +221,5 @@ service.createReader(coordDataPath, schema, handler). with { reader ->
 		reader.close()
 	}
 }
-
+handler2.flush()
+println handler2.getOutput()

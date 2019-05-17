@@ -1,4 +1,6 @@
 {
-  "latitude": 48.858093,
-  "longitude": 2.294694
+  "coordinates": {
+    "latitude": 48.858093,
+    "longitude": 2.294694
+    }
 }
