@@ -37,7 +37,7 @@ Once finished, you will find the `Drivers` directoy containing the following jar
 
 ## What `TC1` does
 
-[`TC1`](Scripts/TC1/Script1558066108685.groovy) is a bit long code but essentially it is simple. It reads a JSON Schema from file, reads a JSON data from file, parse it and apply schema. It prints the data in 2 formats (custom format and pretty-print format). If any problem against schema found, report it. The core part is as follows:
+[`TC1`](Scripts/TC1/Script1558066108685.groovy) is a bit lengthy code. But it is  essentially simple. It reads a JSON Schema from file, reads a JSON data from file, parse it and apply schema. It prints the data in 2 formats (custom format and pretty-print format). If any problem against schema found, report it. The core part is as follows:
 ```
 Path projectDir = Paths.get(RunConfiguration.getProjectDir())
 Path credSchemaPath = projectDir.resolve('Include').resolve('resources').resolve('credential-schema.json')
@@ -80,7 +80,6 @@ Key firstName: STRING John
 Key lastName: STRING Doe
 Key age: NUMBER 59
 
-
 {
     "firstName": "John",
     "lastName": "Doe",
@@ -92,4 +91,38 @@ Key age: NUMBER 59
 <tr><th>Line No.</th><th>Column No.</th><th>Message</th><th>Assertion Keyword</th></tr>
 </thead>
 <tbody>
-<tr><td>4</td><td>11</td><td>
+<tr><td>4</td><td>11</td><td>数値は35以下でなければいけません。</td><td>maximum</td></tr>
+</tbody>
+</table>
+
+
+
+
+OBJECT
+Key coordinates: OBJECT
+Key latitude: NUMBER 48.858093
+Key longitude: NUMBER 2.294694
+
+{
+    "coordinates": {
+        "latitude": 48.858093,
+        "longitude": 2.294694
+    }
+}
+
+<table>
+<thead>
+<tr><th>Line No.</th><th>Column No.</th><th>Message</th><th>Assertion Keyword</th></tr>
+</thead>
+<tbody>
+<tr><td>6</td><td>1</td><td>オブジェクトはプロパティ"firstName"を持たなければいけません。</td><td>required</td></tr>
+<tr><td>6</td><td>1</td><td>オブジェクトはプロパティ"lastName"を持たなければいけません。</td><td>required</td></tr>
+</tbody>
+</table>
+```
+
+Justify emits error messages in English or Japanese depending on the locale of you PC.
+
+## Conclusion
+
+[Justify](https://github.com/leadpony/justify) just works well in Katalon Studio. I think that `Justify` is a good alternative to the `everit/json-schema` library.
