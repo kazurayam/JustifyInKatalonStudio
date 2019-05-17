@@ -125,4 +125,4 @@ Justify emits error messages in English or Japanese depending on the locale of y
 
 ## Conclusion
 
-[Justify](https://github.com/leadpony/justify) just works well in Katalon Studio. I think that `Justify` is a good alternative to the `everit/json-schema` library.
+[Justify](https://github.com/leadpony/justify) just works well in Katalon Studio. I think that `Justify` is a good alternative JSON Schema Validator to the `everit/json-schema` library in Katalon Studio
